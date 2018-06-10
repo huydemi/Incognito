@@ -27,12 +27,21 @@
 /// THE SOFTWARE.
 
 import UIKit
-// TODO add import
+import AeroGearOAuth2
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
   
   var window: UIWindow?
-  
+ 
+  func application(_ app: UIApplication,
+                   open url: URL,
+                   options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
+    
+    let notification = Notification(name: Notification.Name(AGAppLaunchedWithURLNotification),
+                                    object:nil,
+                                    userInfo:[UIApplicationLaunchOptionsKey.url:url])
+    NotificationCenter.default.post(notification)
+    return true
+  }
 }
-
