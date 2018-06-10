@@ -5,5 +5,5 @@ platform :ios, '11.0'
 use_frameworks!
 
 target "Incognito" do
-	pod 'AeroGearOAuth2'
+  pod 'OAuthSwift', :git => 'https://github.com/OAuthSwift/OAuthSwift.git'
 end

@@ -27,6 +27,7 @@
 /// THE SOFTWARE.
 
 import UIKit
+import OAuthSwift
 
 // TODO add import
 
@@ -104,9 +105,42 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
   }
   
   @IBAction private func share(_ sender: AnyObject) {
-		// TODO: your turn to code it!
+    // create the OAuth2Swift that will handle the OAuth dance for you
+    let oauthswift = OAuth2Swift(
+      consumerKey:    "52212015799-9besd9v990o6fevbvekgam937t6fs3vq.apps.googleusercontent.com",
+      consumerSecret: "",    // No secret required
+      authorizeUrl:   "https://accounts.google.com/o/oauth2/auth",
+      accessTokenUrl: "https://accounts.google.com/o/oauth2/token",
+      responseType:   "code"
+    )
+    
+    oauthswift.allowMissingStateCheck = true
+    // initiatize the authorizeURLHandler to a SafariURLHandler which will automatically handle displaying and dismissing a SFSafariViewController
+    oauthswift.authorizeURLHandler = SafariURLHandler(viewController: self, oauthSwift: oauthswift)
+    
+    guard let rwURL = URL(string: "huy.dang.quoc.Incognito:/oauth2Callback") else { return }
+    
+    // request authorization via the oauthswift instance
+    oauthswift.authorize(withCallbackURL: rwURL, scope: "https://www.googleapis.com/auth/drive", state: "", success: {
+      (credential, response, parameters) in
+      oauthswift.client.postImage("https://www.googleapis.com/upload/drive/v2/files",
+                                  parameters: parameters,
+                                  image: self.snapshot(),
+                                  success: {
+                                    // If authorization is granted, you can go ahead and upload the image
+                                    (response) in
+                                    if let _ = try? JSONSerialization.jsonObject(with: response.data, options: []) {
+                                      self.presentAlert("Success", message: "Successfully uploaded!")
+                                    }
+      },
+                                  failure: {
+                                    (error) in
+                                    self.presentAlert("Error", message: error.localizedDescription)
+      })
+    }, failure: { (error) in
+      self.presentAlert("Error", message: error.localizedDescription)
+    })
   }
-  
 }
 
 extension ViewController: UIImagePickerControllerDelegate {
