@@ -4,7 +4,7 @@ In this tutorial we will learn:
 
 - OAuth 2.0
 - Authenticating with AeroGear and External Browsers
-- Using Embedded Safari View
+- Using Embedded Safari View (refe branch [embedded_safari_view](https://github.com/huydemi/Incognito/tree/embedded_safari_view))
 
 ---
 
