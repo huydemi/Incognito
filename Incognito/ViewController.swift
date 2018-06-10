@@ -27,6 +27,8 @@
 /// THE SOFTWARE.
 
 import UIKit
+import AeroGearHttp
+import AeroGearOAuth2
 
 // TODO add import
 
@@ -34,6 +36,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
   
   // MARK: - Private properties
   private var imagePicker = UIImagePickerController()
+  private let http = Http(baseURL: "https://www.googleapis.com")
   
   @IBOutlet private var imageView: UIImageView!
   @IBOutlet private var hatImage: UIImageView!
@@ -104,7 +107,30 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
   }
   
   @IBAction private func share(_ sender: AnyObject) {
-		// TODO: your turn to code it!
+    // Create a configuration
+    let googleConfig = GoogleConfig(
+      clientId: "52212015799-9besd9v990o6fevbvekgam937t6fs3vq.apps.googleusercontent.com",
+      scopes:["https://www.googleapis.com/auth/drive"])
+    
+    // instantiate an OAuth2 module via AccountManager utility methods
+    let gdModule = AccountManager.addGoogleAccount(config: googleConfig)
+    // inject the OAuth2 module into the HTTP object
+    http.authzModule = gdModule
+    // create a multi-part data object to encapsulate the information you wish to send to the server
+    let multipartData = MultiPartData(data: snapshot(),
+                                      name: "image",
+                                      filename: "incognito_photo",
+                                      mimeType: "image/jpg")
+    let multipartArray =  ["file": multipartData]
+    // use a simple HTTP call in to upload the photo
+    http.request(method: .post, path: "/upload/drive/v2/files",  parameters: multipartArray) {
+      (response, error) in
+      if (error != nil) {
+        self.presentAlert("Error", message: error!.localizedDescription)
+      } else {
+        self.presentAlert("Success", message: "Successfully uploaded!")
+      }
+    }
   }
   
 }
